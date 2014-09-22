@@ -23,7 +23,7 @@ def identify_cards(filename):
 
 
 def identify_card(card_blob):
-	ret = (identify_number(card_blob), identify_color(card_blob), identify_shape(card_blob))
+	ret = (identify_number(card_blob), identify_color(card_blob), identify_shape(card_blob), identify_pattern(card_blob))
 	disp = Display()
 	print ret
 	while disp.isNotDone():
@@ -43,6 +43,33 @@ def identify_card(card_blob):
 		 nice.save(disp)
 	
 	return ret
+
+def identify_pattern(card_blob):
+	mask = card_blob.hullImage().colorDistance(Color.WHITE).binarize(100).invert()
+	#mask.findBlobs()[-1]
+	white_content = mask.findBlobs()[-1].hullImage().getNumpy().sum()
+	print "white:", white_content
+	if identify_shape(card_blob) == "diamond":
+		if white_content > 1000000:
+			return "fill"
+		elif white_content > 500000:
+			return "stripe"
+		else:
+			return "empty"
+	elif identify_shape(card_blob) == "oval":
+		if white_content > 2000000:
+			return "fill"
+		elif white_content > 1000000:
+			return "stripe"
+		else:
+			return "empty"
+	elif identify_shape(card_blob) == "squiggle":
+		if white_content > 1500000:
+			return "fill"
+		elif white_content > 700000:
+			return "stripe"
+		else:
+			return "empty"
 
 def identify_number(card_blob):
 	mask = card_blob.hullImage().colorDistance(Color.WHITE).binarize(100)
