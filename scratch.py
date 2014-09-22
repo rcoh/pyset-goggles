@@ -55,9 +55,9 @@ def identify_shape(card_blob):
 	hull = onlyShapes.findBlobs()[-1].contour()
 	shape_descriptor = get_shape_descriptor(hull)
 	print shape_descriptor
-	if shape_descriptor[0.0] > .90:
+	if shape_descriptor[0.0] > .70:
 		return "diamond"
-	elif shape_descriptor[0.0] > .83:
+	elif shape_descriptor[0.0] > .60:
 		return "oval"
 	else:
 		return "squiggle"
@@ -65,7 +65,7 @@ def identify_shape(card_blob):
 
 def get_shape_descriptor(points):
 	descriptor = Counter()
-	bucket_size = math.pi / 20
+	bucket_size = math.pi / 40
 	points = points[0::2]
 	for i in range(len(points) - 2):
 		(v1, v2, v3) = points[i:i+3]
