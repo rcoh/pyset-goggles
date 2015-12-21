@@ -10,7 +10,7 @@ import os
 # Thanks to author of the sudoku example for the wonderful blog posts!
 ###############################################################################
 
-DEBUG = True 
+DEBUG = False
 def rectify(h):
   h = h.reshape((4,2))
   hnew = np.zeros((4,2),dtype = np.float32)
@@ -183,14 +183,21 @@ if __name__ == "__main__":
         CARD_CONTOUR = pickle.load(f)
 
     scene = cv2.imread('training/%s.jpg' % name)          # queryImage
+    scene = cv2.cvtColor(scene, cv2.COLOR_RGB2BGR)
     cards = extract_cards(scene)
     flat_cards = [flatten_card(c, scene) for c in cards]
 
-    cards = set()
-    for f in flat_cards:
+    card_set = set()
+    for (f,cnt) in zip(flat_cards, cards):
         card = recognize_card(f)
+        x,y,w,h= cv2.boundingRect(cnt)
+        print x,y,w,h
+        cv2.putText(scene, str(card), (x, y+h + 20), cv2.FONT_HERSHEY_PLAIN, 4, (255,255,0), 4, cv2.LINE_AA)
         print card
-        cards.add(card)
+        card_set.add(card)
+
+    plt.imshow(scene),plt.show()
+    
 
     truth_path = "ground_truth/%s" % name
     if not os.path.isfile(truth_path):
@@ -200,5 +207,5 @@ if __name__ == "__main__":
 
     with file(truth_path) as truth_file:
         truth = pickle.load(truth_file) 
-        assert cards == truth
+        assert card_set == truth
         print "Success!"
