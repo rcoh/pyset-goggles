@@ -94,6 +94,12 @@ def recognize_card(card):
     else:
         return None
 
+def rgbToYUV(r,g,b):
+   y =  0.299 * r + 0.587 * g + 0.114 * b
+   u = -0.147 * r - 0.289 * g + 0.436 * b
+   v =  0.615 * r - 0.515 * g - 0.100 * b
+   return (y,u,v)
+
 def remove_interior_contours(contours):
     bad = set() 
     for (i, cont) in enumerate(contours):
@@ -150,18 +156,17 @@ def identify_color(color_card, cnt):
     
     pixels = cv2.bitwise_and(yuv_fig, yuv_fig, mask = inv_mask)
     show(pixels)
-    ravg = np.sum(pixels[:,:,0]) / (np.sum(inv_mask) / 255)
     gavg = np.sum(pixels[:,:,1]) / (np.sum(inv_mask) / 255)
+    ravg = np.sum(pixels[:,:,0]) / (np.sum(inv_mask) / 255)
     bavg = np.sum(pixels[:,:,2]) / (np.sum(inv_mask) / 255)
-    print ravg,gavg,bavg
-    if ravg > 100 and bavg > 100 and gavg < 110:
+    (y,u,v) = rgbToYUV(ravg, gavg, bavg)
+
+    if u > 0 and v > 0:
         return "purple"
-    if gavg > 100:
+    elif u < 0 and v < 0:
         return "green"
     else:
         return "red"
-
-    
 
 def select(img, bb):
     x,y,w,h = bb
