@@ -200,10 +200,8 @@ if __name__ == "__main__":
     card_set = set()
     for (f,cnt) in zip(flat_cards, cards):
         card = recognize_card(f)
-        x,y,w,h= cv2.boundingRect(cnt)
-        print x,y,w,h
+        x,y,w,h = cv2.boundingRect(cnt)
         cv2.putText(scene, str(card), (x, y+h + 20), cv2.FONT_HERSHEY_PLAIN, 4, (255,255,0), 4, cv2.LINE_AA)
-        print card
         card_set.add(card)
 
     plt.imshow(scene),plt.show()

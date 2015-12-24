@@ -15,8 +15,10 @@ if __name__ == "__main__":
 		point_strs.append("new Point(%s, %s)" % (x,y))
 	args = ', '.join(point_strs)
 	java_file = """
-		class %s {
-			static MatOfPoint contour = new MatOfPoint(%s);
+		import org.opencv.core.MatOfPoint;
+		import org.opencv.core.Point;
+		public class %s {
+			public static MatOfPoint contour = new MatOfPoint(%s);
 		}
 	""" % (class_name, args)
 
