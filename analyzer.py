@@ -71,7 +71,10 @@ def recognize_card(card):
     gray = cv2.cvtColor(card.copy(),cv2.COLOR_RGB2GRAY)
     blur = cv2.GaussianBlur(gray, (1,1), 1000)
 
-    flag, thresh = cv2.threshold(blur, 160, 255, cv2.THRESH_BINARY)
+    flag, thresh = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    # TODO: if you change the card side maybe also change this constant
+    #thresh = cv2.adaptiveThreshold(blur,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,201,2)
+
     show(thresh)
 
     im2, contours, hierarchy = cv2.findContours(thresh.copy(),cv2.RETR_CCOMP,cv2.CHAIN_APPROX_SIMPLE)
@@ -127,9 +130,9 @@ def identify_fill(card_thresh, cnt):
     bb = cv2.boundingRect(cnt)
     average = np.average(center_section(card_thresh, bb))
     print "average: ", average
-    if average < 100:
+    if average < 10:
         return "solid"
-    if 100 <= average < 200:
+    if 10 <= average < 200:
         return "striped"
     else:
         return "empty"
