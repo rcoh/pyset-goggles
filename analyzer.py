@@ -10,20 +10,7 @@ import os
 # Thanks to author of the sudoku example for the wonderful blog posts!
 ###############################################################################
 
-DEBUG = False
-def rectify(h):
-  h = h.reshape((4,2))
-  hnew = np.zeros((4,2),dtype = np.float32)
-
-  add = h.sum(1)
-  hnew[0] = h[np.argmin(add)]
-  hnew[2] = h[np.argmax(add)]
-   
-  diff = np.diff(h,axis = 1)
-  hnew[1] = h[np.argmin(diff)]
-  hnew[3] = h[np.argmax(diff)]
-
-  return hnew
+DEBUG = True
 
 def show(img):
     if DEBUG:
@@ -48,15 +35,30 @@ def extract_cards(img):
 def flatten_card(contour, image):
     width = 180
     height = 116 
-    x,y,w,h = cv2.boundingRect(contour)
-    if w > h:
-        print "TODODO"
+
     peri = cv2.arcLength(contour,True)
-    approx = rectify(cv2.approxPolyDP(contour, 0.02*peri, True))
-    h = np.array([ [0,0],[height,0],[height,width],[0,width] ],np.float32)
-    transform = cv2.getPerspectiveTransform(approx,h)
+    # squeeze transforms the shape from (4,1,2) to (4,2)
+    corners = np.squeeze(cv2.approxPolyDP(contour, 0.02*peri, True))
+    ordered_corners = order_corners(corners).astype(np.float32)
+    target = np.array([ [0,0],[0,width],[height,width],[height, 0] ],np.float32)
+    
+    transform = cv2.getPerspectiveTransform(ordered_corners,target)
     warp = cv2.warpPerspective(image,transform,(height,width))
+    #show(warp)
     return warp
+
+def order_corners(corners):
+    # Order the corners so that it is long edge -> short edge -> ...
+    p0 = corners[0]
+    p1 = corners[1]
+    p2 = corners[2]
+    if (dist(p0, p1) > dist(p1, p2)):
+        return corners
+    else:
+        return np.append(corners[1:], [corners[0]], axis = 0)
+
+def dist(x,y):   
+    return np.sqrt(np.sum((x-y)**2))
 
 def recognize_card(card):
     
